@@ -22,20 +22,19 @@ const executeQuery = (sql) => {
 const database = {
    createTable: async () => {
       await executeQuery(`
-         CREATE TABLE IF NOT EXISTS accident (
-         id INT PRIMARY KEY AUTO_INCREMENT,
-         address varchar(255) NOT NULL,
-         date DATE NOT NULL,
-         time TIME NOT NULL,
-         injured int NOT NULL,
-         dead int NOT NULL)             
+        CREATE TABLE IF NOT EXISTS booking (
+        id int PRIMARY KEY AUTO_INCREMENT,
+        idType int NOT NULL,
+        date DATE NOT NULL,
+        hour INT NOT NULL,
+        name VARCHAR(50),
+        FOREIGN KEY (idType) REFERENCES type(id)             
       `);
       return await executeQuery(`
-         CREATE TABLE IF NOT EXISTS plates (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            plate VARCHAR(20) NOT NULL,
-            idAccident INT NOT NULL,
-            FOREIGN KEY (idAccident) REFERENCES accident(id) ON DELETE CASCADE)      
+        CREATE TABLE IF NOT EXISTS type (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        name varchar(20)
+        )      
       `);
    },
    insert: async (accident) => {
@@ -92,4 +91,3 @@ const database = {
    }
 }
 
-module.exports = database;
