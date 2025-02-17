@@ -19,10 +19,7 @@ app.get('/select', async (req, res) => {
     const list = await database.select();
     res.json(list);
 });
-app.delete('/delete/:id', async (req, res) => {
-  await database.remove(req.params.id);
-  res.json({result: "ok"});
-})
+
 const server = http.createServer(app);
 const port = 5600;
 server.listen(port, () => {

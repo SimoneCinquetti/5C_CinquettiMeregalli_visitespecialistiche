@@ -1,14 +1,7 @@
 const createMiddleware = () => {
     return {
       load: async () => {
-        const response = await fetch("/accidents");
-        const json = await response.json();
-        return json;
-      },
-      delete: async (id) => {
-        const response = await fetch("/delete/" + id, {
-          method: 'DELETE',
-        });
+        const response = await fetch("/select");
         const json = await response.json();
         return json;
       },

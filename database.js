@@ -46,10 +46,6 @@ const db = {
     return await executeQuery("SELECT * FROM booking");
   },
 
-  remove: async (booking) => {
-    const sql = "DELETE FROM booking WHERE id = ?";
-    return await executeQuery(sql, [booking.id]);
-  }
 };
 
 module.exports = db;
