@@ -38,12 +38,17 @@ const db = {
   },
 
   insert: async (booking) => {
+    console.log(booking);
     const sql = "INSERT INTO booking (idType, date, hour, name) VALUES (?, ?, ?, ?)";
     return await executeQuery(sql, [booking.idType, booking.date, booking.hour, booking.name]);
   },
   
   select: async () => {
     return await executeQuery("SELECT * FROM booking");
+  },
+
+  selectType: async () => {
+    return await executeQuery("SELECT * FROM type");
   },
 
 };

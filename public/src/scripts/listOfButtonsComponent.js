@@ -1,34 +1,24 @@
-const createListOfButtons = (parentElement) => {
-    let data;
-    let btnFunction;
-    let currentActiveBtn;
-    return {
-        build: (dataInput, functionInput) => {
-            data = dataInput;
-            btnFunction = functionInput;
-        },
-        render: () => {
-            let buttons = ""; 
-            buttons += data.map((e, index) => `
-                <button type="button" id="button${index}" class="btn btn-secondary">${e}</a>
-            `).join("\n");
-            parentElement.innerHTML = buttons;
-            const btnList = document.querySelectorAll(".btn-secondary");
+export const generateButtonComponent = (parentElement) => {
+    let nome ;
+    let callback ;
 
-            btnList.forEach((btn) => {
-                btn.onclick = function () {
-                    btnList.forEach((button) => button.classList.remove('active'));
-                    this.classList.add('active');
-                    currentActiveBtn = this.innerHTML.trim();
-                    btnFunction(currentActiveBtn);
-                }
-            });
+    return {
+        build : function(label) {
+            nome = label ;
         },
-        getCurrentSelectedCategory: () => {
-            return currentActiveBtn;
+        onsubmit : function(inputCallback) {
+            callback = inputCallback ;
+        },
+        render : function() {
+            let html = '<button type="button" id="' + nome + '" class="btn btn-info text-white actionButton ' + nome + '">' + nome + '</button>' ;
+
+            parentElement.innerHTML = html ;
+
+            let e = document.getElementById(nome) ;
+            
+            e.onclick = () => {
+                callback() ;
+            }
         }
-        
     }
 }
-
-export { createListOfButtons };

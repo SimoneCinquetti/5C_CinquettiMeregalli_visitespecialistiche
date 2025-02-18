@@ -2,23 +2,32 @@ const express = require("express");
 const http = require('http');
 const path = require('path');
 const app = express();
+app.use(express.json()); // Aggiunge il parser per il body in JSON
 const database = require("./database");
 database.createTable();
 
 app.use("/", express.static(path.join(__dirname, "public")));
 app.post("/insert", async (req, res) => {
-  const visit = req.body.visit;
+  console.log(req.body);
+  const { idType, date, hour, name } = req.body;
   try {
-    await database.insert(visit);
-    res.json({result: "ok"});
-  } catch (e) {
-    res.status(500).json({result: "ko"});
-  }
+    await database.insert({ idType, date, hour, name });
+    res.json({ result: "ok" });
+} catch (e) {
+    res.status(500).json({ result: "ko", error: e.message });
+}
 })
 app.get('/select', async (req, res) => {
     const list = await database.select();
     res.json(list);
 });
+
+app.get('/type', async (req, res) => {
+  const list = await database.selectType();
+  res.json(list);
+});
+
+
 
 const server = http.createServer(app);
 const port = 5600;

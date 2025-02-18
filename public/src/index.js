@@ -1,141 +1,93 @@
-import { initTable } from "./scripts/tableComponent.js";
-import { createListOfButtons } from './scripts/listOfButtonsComponent.js';
-import { createModalForm } from './scripts/modalFormComponent.js';
-import { getMondayOfDate, chooseType } from './scripts/utils.js';
-import { gestorePrenotazioniCache } from './scripts/fetch.js';
-import createMiddleware from "./scripts/middleware.js";
-
-const form = createModalForm(document.getElementById("modal-bd"));
-const listOfButtons = createListOfButtons(document.getElementById("tipologie"));
-const appTable = initTable(document.getElementById("appuntamenti"));
-const next = document.getElementById("avanti");
-const previous = document.getElementById("indietro");
-const middleware = createMiddleware();
-
-middleware.add({
-    visit: {
-        idType: 3,
-        date: new Date().toISOString().split('T')[0], // Formatta la data come "YYYY-MM-DD"
-        hour: 14,
-        name: "Pietro"
-    }
-});
+import {createMiddleware} from "./scripts/middleware.js";
+import {generateReservationForm} from "./scripts/modalFormComponent.js";
+import {generateButtonComponent} from "./scripts/listOfButtonsComponent.js";
+import {generateTable} from "./scripts/tableComponent.js";
+import {generateNavbar} from "./scripts/navbarComponent.js";
 
 
-fetch("./conf.json").then(r => r.json()).then((keyCache) => { //AL POSTO DELLA FETCH VA USATO IL MIDDLEWARE, la fetch va eliminata
+const modalBody = document.getElementById("modalBody");
+const navbarContainer = document.getElementById("navbarContainer");
+const tableContainer = document.getElementById("tableContainer");
+const prevButtonContainer = document.getElementById("prevButtonContainer");
+const nextButtonContainer = document.getElementById("nextButtonContainer");
+const spinner = document.getElementById("spinner");
+
+let confFileContent;
+const hours = [8, 9, 10, 11, 12];
+const days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì"];
+
+const componenteFetch = createMiddleware() ;
+const componentTable = generateTable(tableContainer);
+const reservationForm = generateReservationForm(modalBody);
+const navbar = generateNavbar(navbarContainer);
+const prevButton = generateButtonComponent(prevButtonContainer) ;
+const nextButton = generateButtonComponent(nextButtonContainer) ;
+
+componenteFetch.loadType()
+.then(data => {
+    confFileContent = data.map(e=>e.name);
+console.log(confFileContent);
+
+    navbar.build(confFileContent);
+    navbar.render();
+    navbar.onclick(category => {
+        reservationForm.setType(category);
+        spinner.classList.remove("d-none");
+        componenteFetch.getData("clinica").then((r) => {
+            spinner.classList.add("d-none");
+            componentTable.setData(r ,category)
+            componentTable.render();
+        });
+    });
+    reservationForm.setType(navbar.getCurrentCategory());
     
-    
-
-    //booking.idType, booking.date, booking.hour, booking.name
-
-
-
-    let cacheRemota= gestorePrenotazioniCache(keyCache.otherInfo.cacheToken,"prenotazioni");
-    console.log("c"+cacheRemota);
-    console.log("k"+keyCache)
-    // Lista di bottoni
-    listOfButtons.build([...keyCache.otherInfo.tipologie], (currentActiveBtn) => {
-        appTable.build(
-            appTable.getCurrentDate(), 
-            chooseType(cacheRemota.mostraPrenotazioniCache(), currentActiveBtn),
-            currentActiveBtn
-        );
-        appTable.render();
+    componentTable.build(hours, days);
+    spinner.classList.remove("d-none");
+    componenteFetch.load().then(data => {
+        spinner.classList.add("d-none");
+        componentTable.setData(data, navbar.getCurrentCategory());
+        componentTable.render();
     });
 
-    listOfButtons.render();
-
-    // Form
-    form.onsubmit((result) => {
-        let prenotazione="";
-        prenotazione+=listOfButtons.getCurrentSelectedCategory()+"-"
-        let data=result[0].split("-").reverse().join("")
-        prenotazione+=data+"-"
-        prenotazione+=result[1]
-
-        let check=true
-        for (const key in cacheRemota.mostraPrenotazioniCache()){
-            let elementi=key.split("-")
-            if(elementi[1]===data && elementi[2]===result[1]){
-                check=false
-            }
+    reservationForm.build(hours);
+    reservationForm.render();
+    reservationForm.onsubmit(r => {
+        console.log(r);
+        if (componentTable.add(r)) {
+            reservationForm.setStatus(true);
+            componentTable.setData(componentTable.getData(), navbar.getCurrentCategory());
+            componenteFetch.add(r).then(r => console.log(r));
         }
-
-        if(data.length > 0 && result[1].length >0 && result[2].length > 0 && check){
-            cacheRemota.aggiungerePrenotazioneCache(prenotazione,result[2])
-            appTable.build(
-                appTable.getCurrentDate(), 
-                chooseType(cacheRemota.mostraPrenotazioniCache(), listOfButtons.getCurrentSelectedCategory()), 
-                appTable.getCurrentTypo()
-            );
-            appTable.render();
-            document.getElementById("prompt").innerHTML = "Prenotazione effettuata!";
-        } else {
-            document.getElementById("prompt").innerHTML = "Prenotazione errata";
+        else {
+            reservationForm.setStatus(false);
         }
     });
-    
-    form.setLabels({
-        "Data" : [
-            "Date",
-            null
-        ],
-        "Ora" : [
-            "select",
-            ["8","9","10","11","12"]
-        ],
-        "Nominativo" : [
-            "text",
-            null
-        ]
-    });
+    reservationForm.oncancel(() => componentTable.render());
 
-    next.onclick = () => {
-        const newDate = new Date(appTable.getCurrentDate());
-        newDate.setDate(newDate.getDate() + 7)
-        appTable.build(
-            newDate, 
-            chooseType(cacheRemota.mostraPrenotazioniCache(), appTable.getCurrentTypo()), 
-            appTable.getCurrentTypo()
-        );
-        appTable.render();
-    }
+    prevButton.build('Settimana precedente') ;
+    nextButton.build('Settimana\nsuccessiva') ;
 
-    previous.onclick = () => {
-        const newDate = new Date(appTable.getCurrentDate());
-        newDate.setDate(newDate.getDate() - 7)
-        appTable.build(
-            newDate, 
-            chooseType(cacheRemota.mostraPrenotazioniCache(), appTable.getCurrentTypo()), 
-            appTable.getCurrentTypo()
-        );
-        appTable.render();
-    }
+    prevButton.render() ;
+    prevButton.onsubmit(() => {
+        componentTable.previous();
+        componentTable.setData(componentTable.getData(), navbar.getCurrentCategory());  
+        componentTable.render();
+    }) ;
 
-    form.render();
+    nextButton.render() ;
+    nextButton.onsubmit(() => {
+        componentTable.next();
+        componentTable.setData(componentTable.getData(), navbar.getCurrentCategory());  
+        componentTable.render();
+    }) ;
 
-    const intervalId = setInterval(() => {
-        if (cacheRemota.mostraPrenotazioniCache()) {
-            clearInterval(intervalId);
-            let actualDate = new Date().toISOString().split('T')[0];
-            appTable.build(
-                getMondayOfDate(actualDate), 
-                chooseType(cacheRemota.mostraPrenotazioniCache(), keyCache.otherInfo.tipologie[0]),
-                keyCache.otherInfo.tipologie[0],
-            );
-            appTable.render();
-        }
-    }, 100)
-
-    // Ripetizione
     setInterval(() => {
-        cacheRemota= gestorePrenotazioniCache(keyCache.otherInfo.cacheToken,"prenotazioni");
-        appTable.build(
-            appTable.getCurrentDate(), 
-            chooseType(cacheRemota.mostraPrenotazioniCache(), appTable.getCurrentTypo),
-            appTable.getCurrentTypo(),
-        );
-    }, 300000)
-
-    document.getElementById("button0").click()
+        reservationForm.setType(navbar.getCurrentCategory());
+        spinner.classList.remove("d-none");
+        componenteFetch.getData("clinica").then((r) => {
+            spinner.classList.add("d-none");
+            componentTable.setData(r ,navbar.getCurrentCategory())
+            componentTable.render();
+        });
+    }, 300000);
 });

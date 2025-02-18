@@ -1,100 +1,87 @@
-const createTable = (parentElement) => {
-    let data;
+export const generateTable = (parentElement) => {
+    let hours;
+    let days;
+    let cacheData = {};
+    let currentData = {};
+
+    let date = new Date(Date.now());
+
     return {
-        build: (dataInput) => {
-            data = dataInput;
-        },
-        render: () => {
-            let htmlTable = '<table class="table border border-dark">';
-            htmlTable += data.map((row) =>
-                "<tr>" + row.map((col) =>
-                    "<td class='border border-dark'>" + col + "</td>"
-                ).join("")
-            ).join("") + "</tr>";
-            htmlTable += "</table>";
-            parentElement.innerHTML = htmlTable;
-        }
-    }
-}
-
-/*
-    Struttura del dizionario
-    { 
-        "Cardiologia-27092024-9": "Mario Rossi"
-        "Oncologia-21042025-12", "Sandra Bianchi"
-        ...
-    }
-*/
-
-/*
-    BATTAGLIA NAVALE:
-    - Formato della tabella
-    [Orario, g1, g2, g3, g4, g5]
-    [1, "", "", "", "", ""]
-    [2, "", "", "", "", ""]
-    [3, "", "", "", "", ""]
-    [4, "", "", "", "", ""]
-
-    Trovare colonna corrispondente al giorno j
-    Trovare la riga corrispondente all'orario i
-*/
-
-const initTable = (parentElement) => {
-    let date;
-    let data;
-    let type;
-    return {
-        build: (dateInput, dataInput, typo) => {
-            date = dateInput;
-            data = dataInput;
-            type = typo;
-        }, 
-        render: () => {
-            // Gli orari
-            let tableStructure = [];
-            let dateRow = ["Orario", "Lunedì " + new Date(date).toISOString().split('T')[0]];
-            const giorni = ["Martedì", "Mercoledì", "Giovedì", "Venerdì"];
-
-            for (let i = 1; i < 5; i++) {
-                let weekDate = new Date(date);
-                weekDate.setDate(weekDate.getDate() + i);
-                dateRow.push(giorni[i - 1] + " " + weekDate.toISOString().split('T')[0]); 
-            }
-
-            tableStructure.push(dateRow);
-
-            // Gli orari
-            for (let i = 8; i <= 12; i++) {
-                let tableRow = [];
-                for (let i = 0; i < dateRow.length - 1; i++) tableRow.push("");
-                tableStructure.push([i, ...tableRow]);
-            }
-
-            const getCorrectDate = (date) => date.split("-").reverse().join("");
-
-            for (let key in data) {
-                const coords = key.split("-");
-                let j = dateRow
-                        .slice(1)
-                        .findIndex((e) => getCorrectDate(e.split(" ")[1]) == coords[1]) + 1;
-                let i = tableStructure.findIndex((e) => e[0] == coords[2])
-
-                if (i != 0 && j != 0) {
-                    tableStructure[i][j] = data[key];
+        build : (newHours, newDays) => {
+            hours = newHours;
+            days = newDays;
+            while (date.getDay() !== 1) {
+                if (date.getDay() === 6 || date.getDay() === 0) {
+                    date.setDate(date.getDate() + 1);
+                } else {
+                    date.setDate(date.getDate() - 1);
                 }
             }
+        },
+        render : () => {
+            let html = '<table class="table table-bordered"> <thead>' ;
+            let dataKeys = Object.keys(currentData);
+            let dataValues = Object.values(currentData);
 
-            const table = createTable(parentElement);
-            table.build(tableStructure);
-            table.render();
+            //Headers
+            html += "<tr><th class='table-secondary'>#</th>";
+            for (let i = 0; i < days.length; i++) {
+                html += "<th  class='table-secondary'>" + days[i] + "\n" + dataKeys[i*hours.length].split("-")[1] + "</th>";
+            }
+            html += "</tr>";
+            
+            //Values
+            for (let h = 0; h < hours.length; h++) { // itera per ogni ora
+                html += "<tr><td>" + hours[h] + "</td>";
+                for (let i = 0; i < dataValues.length; i += hours.length) { // itera ogni giorno, quindi l'aumento deve essere del numero di ore
+                    html += "<td>" + dataValues[i + h] + "</td>";
+                }
+                html += "</tr>";
+            }
+            
+            parentElement.innerHTML = html ;
         },
-        getCurrentDate: () => {
-            return date;
+        add : (reservation) => {
+            if (!cacheData[Object.keys(reservation)[0]]) { //Se è presente il valore
+                cacheData[Object.keys(reservation)[0]] = Object.values(reservation)[0];
+                return true;
+            }
+            return false;
         },
-        getCurrentTypo: () => {
-            return type;
+        setData : (inputData, type) => {
+            cacheData = inputData;
+            currentData = {};
+
+            let hold = new Date(date); // data usata per la tabella visualizzata
+
+            for (let i = 0; i < days.length; i++) {
+
+                for (let j = 0; j < hours.length; j++) {
+                    let formatDate =  type + "-" + parseInt(hold.getDate()) + "/" + parseInt(hold.getMonth() + 1) + "/" + hold.getFullYear() + "-" + hours[j];
+                    if (cacheData[formatDate]) {
+                        currentData[formatDate] = cacheData[formatDate];
+                    } else {
+                        currentData[formatDate] = "";
+                    }
+                }   
+                hold.setDate(hold.getDate() + 1);
+                
+            }
+        },
+        next : () => {
+            date.setDate(date.getDate() + 7);
+            while (date.getDay() !== 1) {
+                date.setDate(date.getDate() - 1);
+            }
+        },
+        previous : () => {
+            date.setDate(date.getDate() - 7);
+            while (date.getDay() !== 1) {
+                date.setDate(date.getDate() - 1);
+            }
+        },
+        getData : () => {
+            return cacheData;
         }
     }
 }
-
-export { initTable };
