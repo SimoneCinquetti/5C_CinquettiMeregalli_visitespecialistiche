@@ -2,9 +2,10 @@ export const generateReservationForm = (parentElement) => {
     let configuration;
     let submitCallback, cancelCallback;
     let type;
-
+    let types;
     return {
-        build: (inputConfiguration) => {
+        build: (inputConfiguration,thisType) => {
+            types=thisType;
             configuration = inputConfiguration;
         },
         onsubmit: (inputCallback) => {
@@ -31,8 +32,10 @@ export const generateReservationForm = (parentElement) => {
                 let dateVal = document.getElementById("dateInput").value.split("-");
                 let hourVal = document.getElementById("hourInput").value;
                 let nameVal = document.getElementById("nameInput").value;
-
-                const reservation = {
+console.log(types);
+console.log(type);
+               const reservation = {
+                    "idType":types.find(item => item.name === type).id,
                     "date":parseInt(dateVal[2]) + "/" + parseInt(dateVal[1]) + "/" + dateVal[0],
                     "hour":hourVal,
                     "name":nameVal

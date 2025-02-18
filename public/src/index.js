@@ -1,9 +1,8 @@
-import {createMiddleware} from "./scripts/middleware.js";
-import {generateReservationForm} from "./scripts/modalFormComponent.js";
-import {generateButtonComponent} from "./scripts/listOfButtonsComponent.js";
-import {generateTable} from "./scripts/tableComponent.js";
-import {generateNavbar} from "./scripts/navbarComponent.js";
-
+import { createMiddleware } from "./scripts/middleware.js";
+import { generateReservationForm } from "./scripts/modalFormComponent.js";
+import { generateButtonComponent } from "./scripts/listOfButtonsComponent.js";
+import { generateTable } from "./scripts/tableComponent.js";
+import { generateNavbar } from "./scripts/navbarComponent.js";
 
 const modalBody = document.getElementById("modalBody");
 const navbarContainer = document.getElementById("navbarContainer");
@@ -16,78 +15,81 @@ let confFileContent;
 const hours = [8, 9, 10, 11, 12];
 const days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì"];
 
-const componenteFetch = createMiddleware() ;
+const componenteFetch = createMiddleware();
 const componentTable = generateTable(tableContainer);
 const reservationForm = generateReservationForm(modalBody);
 const navbar = generateNavbar(navbarContainer);
-const prevButton = generateButtonComponent(prevButtonContainer) ;
-const nextButton = generateButtonComponent(nextButtonContainer) ;
+const prevButton = generateButtonComponent(prevButtonContainer);
+const nextButton = generateButtonComponent(nextButtonContainer);
+let categories;
 
-componenteFetch.loadType()
-.then(data => {
-    confFileContent = data.map(e=>e.name);
-console.log(confFileContent);
+(async () => {
+    categories = await componenteFetch.loadType();
+    console.log(categories);
+    confFileContent = categories.map(e => e.name);
+    console.log(confFileContent);
 
     navbar.build(confFileContent);
     navbar.render();
-    navbar.onclick(category => {
+
+    navbar.onclick(async (category) => {
         reservationForm.setType(category);
         spinner.classList.remove("d-none");
-        componenteFetch.getData("clinica").then((r) => {
-            spinner.classList.add("d-none");
-            componentTable.setData(r ,category)
-            componentTable.render();
-        });
-    });
-    reservationForm.setType(navbar.getCurrentCategory());
-    
-    componentTable.build(hours, days);
-    spinner.classList.remove("d-none");
-    componenteFetch.load().then(data => {
+        const r = await componenteFetch.getData("clinica");
         spinner.classList.add("d-none");
-        componentTable.setData(data, navbar.getCurrentCategory());
+        componentTable.setData(r, category);
         componentTable.render();
     });
 
-    reservationForm.build(hours);
+    reservationForm.setType(navbar.getCurrentCategory());
+
+    componentTable.build(hours, days);
+    spinner.classList.remove("d-none");
+
+    const data = await componenteFetch.load();
+    spinner.classList.add("d-none");
+    componentTable.setData(data, navbar.getCurrentCategory());
+    componentTable.render();
+
+    reservationForm.build(hours, categories);
     reservationForm.render();
-    reservationForm.onsubmit(r => {
+
+    reservationForm.onsubmit(async (r) => {
         console.log(r);
         if (componentTable.add(r)) {
             reservationForm.setStatus(true);
             componentTable.setData(componentTable.getData(), navbar.getCurrentCategory());
-            componenteFetch.add(r).then(r => console.log(r));
-        }
-        else {
+            console.log(await componenteFetch.add(r));
+        } else {
             reservationForm.setStatus(false);
         }
     });
+
     reservationForm.oncancel(() => componentTable.render());
 
-    prevButton.build('Settimana precedente') ;
-    nextButton.build('Settimana\nsuccessiva') ;
+    prevButton.build('Settimana precedente');
+    nextButton.build('Settimana\nsuccessiva');
 
-    prevButton.render() ;
+    prevButton.render();
     prevButton.onsubmit(() => {
         componentTable.previous();
-        componentTable.setData(componentTable.getData(), navbar.getCurrentCategory());  
+        componentTable.setData(componentTable.getData(), navbar.getCurrentCategory());
         componentTable.render();
-    }) ;
+    });
 
-    nextButton.render() ;
+    nextButton.render();
     nextButton.onsubmit(() => {
         componentTable.next();
-        componentTable.setData(componentTable.getData(), navbar.getCurrentCategory());  
+        componentTable.setData(componentTable.getData(), navbar.getCurrentCategory());
         componentTable.render();
-    }) ;
+    });
 
-    setInterval(() => {
+    setInterval(async () => {
         reservationForm.setType(navbar.getCurrentCategory());
         spinner.classList.remove("d-none");
-        componenteFetch.getData("clinica").then((r) => {
-            spinner.classList.add("d-none");
-            componentTable.setData(r ,navbar.getCurrentCategory())
-            componentTable.render();
-        });
+        const r = await componenteFetch.getData("clinica");
+        spinner.classList.add("d-none");
+        componentTable.setData(r, navbar.getCurrentCategory());
+        componentTable.render();
     }, 300000);
-});
+})();
