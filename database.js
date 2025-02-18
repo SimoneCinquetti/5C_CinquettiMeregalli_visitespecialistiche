@@ -1,6 +1,6 @@
 const mysql = require('mysql2');
 const fs = require('fs');
-const conf = JSON.parse(fs.readFileSync('conf.json'));
+const conf = JSON.parse(fs.readFileSync('./public/conf.json')).database;
 conf.ssl.ca = fs.readFileSync(__dirname + '/ca.pem');
 const connection = mysql.createConnection(conf);
 

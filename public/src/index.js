@@ -1,21 +1,22 @@
 import { initTable } from "./scripts/tableComponent.js";
 import { createListOfButtons } from './scripts/listOfButtonsComponent.js';
 import { createModalForm } from './scripts/modalFormComponent.js';
-import { getMondayOfDate, chooseType } from './utils.js';
-import { gestorePrenotazioniCache } from './fetch.js';
+import { getMondayOfDate, chooseType } from './scripts/utils.js';
+import { gestorePrenotazioniCache } from './scripts/fetch.js';
 
 const form = createModalForm(document.getElementById("modal-bd"));
 const listOfButtons = createListOfButtons(document.getElementById("tipologie"));
 const appTable = initTable(document.getElementById("appuntamenti"));
 const next = document.getElementById("avanti");
 const previous = document.getElementById("indietro");
-
+console.log("ww")
 fetch("./conf.json").then(r => r.json()).then((keyCache) => {
-
-    let cacheRemota= gestorePrenotazioniCache(keyCache.cacheToken,"prenotazioni");
     
+    let cacheRemota= gestorePrenotazioniCache(keyCache.otherInfo.cacheToken,"prenotazioni");
+    console.log("c"+cacheRemota);
+    console.log("k"+keyCache)
     // Lista di bottoni
-    listOfButtons.build([...keyCache.tipologie], (currentActiveBtn) => {
+    listOfButtons.build([...keyCache.otherInfo.tipologie], (currentActiveBtn) => {
         appTable.build(
             appTable.getCurrentDate(), 
             chooseType(cacheRemota.mostraPrenotazioniCache(), currentActiveBtn),
@@ -101,8 +102,8 @@ fetch("./conf.json").then(r => r.json()).then((keyCache) => {
             let actualDate = new Date().toISOString().split('T')[0];
             appTable.build(
                 getMondayOfDate(actualDate), 
-                chooseType(cacheRemota.mostraPrenotazioniCache(), keyCache.tipologie[0]),
-                keyCache.tipologie[0],
+                chooseType(cacheRemota.mostraPrenotazioniCache(), keyCache.otherInfo.tipologie[0]),
+                keyCache.otherInfo.tipologie[0],
             );
             appTable.render();
         }
@@ -110,7 +111,7 @@ fetch("./conf.json").then(r => r.json()).then((keyCache) => {
 
     // Ripetizione
     setInterval(() => {
-        cacheRemota= gestorePrenotazioniCache(keyCache.cacheToken,"prenotazioni");
+        cacheRemota= gestorePrenotazioniCache(keyCache.otherInfo.cacheToken,"prenotazioni");
         appTable.build(
             appTable.getCurrentDate(), 
             chooseType(cacheRemota.mostraPrenotazioniCache(), appTable.getCurrentTypo),
