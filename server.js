@@ -25,3 +25,4 @@ const port = 5600;
 server.listen(port, () => {
   console.log("- server running on port: " + port);
 });
+//sistemazione client 8tabella che non si vede, pulsanti),(configurazione che prende anzichè dal conf dal db di debeaver per le visite)
