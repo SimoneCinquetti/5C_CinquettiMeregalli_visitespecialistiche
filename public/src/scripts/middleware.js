@@ -1,4 +1,4 @@
-const createMiddleware = () => {
+const createMiddleware = () => { //sostituire fetch con comandi del database (dalla relativa classe)
     return {
       load: async () => {
         const response = await fetch("/select");

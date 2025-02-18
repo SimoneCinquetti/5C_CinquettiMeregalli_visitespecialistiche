@@ -10,7 +10,7 @@ const appTable = initTable(document.getElementById("appuntamenti"));
 const next = document.getElementById("avanti");
 const previous = document.getElementById("indietro");
 console.log("ww")
-fetch("./conf.json").then(r => r.json()).then((keyCache) => {
+fetch("./conf.json").then(r => r.json()).then((keyCache) => { //AL POSTO DELLA FETCH VA USATO IL MIDDLEWARE, la fetch va eliminata
     
     let cacheRemota= gestorePrenotazioniCache(keyCache.otherInfo.cacheToken,"prenotazioni");
     console.log("c"+cacheRemota);
