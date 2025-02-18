@@ -2,6 +2,7 @@ import { initTable } from "./scripts/tableComponent.js";
 import { createListOfButtons } from './scripts/listOfButtonsComponent.js';
 import { createModalForm } from './scripts/modalFormComponent.js';
 import { getMondayOfDate, chooseType } from './utils.js';
+import { gestorePrenotazioniCache } from './fetch.js';
 
 const form = createModalForm(document.getElementById("modal-bd"));
 const listOfButtons = createListOfButtons(document.getElementById("tipologie"));
