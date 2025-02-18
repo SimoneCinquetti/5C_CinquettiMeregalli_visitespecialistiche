@@ -3,15 +3,33 @@ import { createListOfButtons } from './scripts/listOfButtonsComponent.js';
 import { createModalForm } from './scripts/modalFormComponent.js';
 import { getMondayOfDate, chooseType } from './scripts/utils.js';
 import { gestorePrenotazioniCache } from './scripts/fetch.js';
+import createMiddleware from "./scripts/middleware.js";
 
 const form = createModalForm(document.getElementById("modal-bd"));
 const listOfButtons = createListOfButtons(document.getElementById("tipologie"));
 const appTable = initTable(document.getElementById("appuntamenti"));
 const next = document.getElementById("avanti");
 const previous = document.getElementById("indietro");
-console.log("ww")
+const middleware = createMiddleware();
+
+middleware.add({
+    visit: {
+        idType: 3,
+        date: new Date().toISOString().split('T')[0], // Formatta la data come "YYYY-MM-DD"
+        hour: 14,
+        name: "Pietro"
+    }
+});
+
+
 fetch("./conf.json").then(r => r.json()).then((keyCache) => { //AL POSTO DELLA FETCH VA USATO IL MIDDLEWARE, la fetch va eliminata
     
+    
+
+    //booking.idType, booking.date, booking.hour, booking.name
+
+
+
     let cacheRemota= gestorePrenotazioniCache(keyCache.otherInfo.cacheToken,"prenotazioni");
     console.log("c"+cacheRemota);
     console.log("k"+keyCache)

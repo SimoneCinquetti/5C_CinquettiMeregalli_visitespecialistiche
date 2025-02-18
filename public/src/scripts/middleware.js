@@ -5,14 +5,14 @@ const createMiddleware = () => { //sostituire fetch con comandi del database (da
         const json = await response.json();
         return json;
       },
-      add: async (accident) => {
+      add: async (visitContent) => {
         const response = await fetch("/insert", {
             method: 'POST',
             headers: {
                 "content-type": "application/json"
             },
             body: JSON.stringify({
-                accident: accident
+                visit: visitContent
             })
         });
         const json = await response.json();
@@ -22,3 +22,9 @@ const createMiddleware = () => { //sostituire fetch con comandi del database (da
   }
 
   export default createMiddleware;
+
+  /*
+  body: JSON.stringify({
+                visit: visitContent
+            })
+  */
