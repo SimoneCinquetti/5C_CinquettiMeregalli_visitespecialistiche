@@ -35,7 +35,7 @@ let categories;
     navbar.onclick(async (category) => {
         reservationForm.setType(category);
         spinner.classList.remove("d-none");
-        const r = await componenteFetch.getData("clinica");
+        const r = await componenteFetch.load("clinica");
         spinner.classList.add("d-none");
         componentTable.setData(r, category);
         componentTable.render();

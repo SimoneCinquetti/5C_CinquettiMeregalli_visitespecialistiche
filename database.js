@@ -38,9 +38,11 @@ const db = {
   },
 
   insert: async (booking) => {
+    let temp=booking.date.split("/");
+    let temp2=temp[2]+"-"+(parseInt(temp[1])<10?"0"+temp[1]:temp[1])+"-"+(parseInt(temp[0])<10?"0"+temp[0]:temp[0]);
     console.log(booking);
     const sql = "INSERT INTO booking (idType, date, hour, name) VALUES (?, ?, ?, ?)";
-    return await executeQuery(sql, [booking.idType, booking.date, booking.hour, booking.name]);
+    return await executeQuery(sql, [booking.idType, temp2, booking.hour, booking.name]);
   },
   
   select: async () => {
