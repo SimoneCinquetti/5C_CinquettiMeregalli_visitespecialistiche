@@ -25,9 +25,7 @@ let categories;
 
 (async () => {
     categories = await componenteFetch.loadType();
-    console.log(categories);
     confFileContent = categories.map(e => e.name);
-    console.log(confFileContent);
 
     navbar.build(confFileContent);
     navbar.render();
@@ -35,7 +33,7 @@ let categories;
     navbar.onclick(async (category) => {
         reservationForm.setType(category);
         spinner.classList.remove("d-none");
-        const r = await componenteFetch.load("clinica");
+        const r = await componenteFetch.load();
         spinner.classList.add("d-none");
         componentTable.setData(r, category);
         componentTable.render();
@@ -43,7 +41,7 @@ let categories;
 
     reservationForm.setType(navbar.getCurrentCategory());
 
-    componentTable.build(hours, days);
+    componentTable.build(hours, days,categories);
     spinner.classList.remove("d-none");
 
     const data = await componenteFetch.load();
@@ -55,11 +53,11 @@ let categories;
     reservationForm.render();
 
     reservationForm.onsubmit(async (r) => {
-        console.log(r);
-        if (componentTable.add(r)) {
+        if (componentTable.add()) {
             reservationForm.setStatus(true);
-            componentTable.setData(componentTable.getData(), navbar.getCurrentCategory());
             console.log(await componenteFetch.add(r));
+            componentTable.setData(await componenteFetch.load(), navbar.getCurrentCategory());
+            componentTable.render()
         } else {
             reservationForm.setStatus(false);
         }
@@ -87,9 +85,9 @@ let categories;
     setInterval(async () => {
         reservationForm.setType(navbar.getCurrentCategory());
         spinner.classList.remove("d-none");
-        const r = await componenteFetch.getData("clinica");
+        const r = await componenteFetch.load();
         spinner.classList.add("d-none");
         componentTable.setData(r, navbar.getCurrentCategory());
         componentTable.render();
-    }, 300000);
+    }, 120000); //ogni 2 minuti
 })();
