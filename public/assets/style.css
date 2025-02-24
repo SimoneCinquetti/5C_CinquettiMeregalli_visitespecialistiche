@@ -1,6 +1,35 @@
+body{
+    background:rgba(122, 189, 189, 0.582);
+    
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+
 .underPadding{
     margin-bottom : 20px ;
 }
 .underPadding2{
     margin-bottom : 10px ;
+}
+
+body{
+    font-family: Comic sans-serif;
+}
+
+.table{
+    border-color: black;
+    margin-top: 1% !important;
+}
+
+.btn{
+    border-color: black;
+    background-color: rgb(244, 252, 139);
+    color: rgb(0, 0, 0);
+}
+
+.main-container{
+    margin-top: 10% !important;
+}
+
+.title-container{
+    text-align: center;
+    margin-top: 2%;
 }

@@ -66,7 +66,7 @@ let categories;
     reservationForm.oncancel(() => componentTable.render());
 
     prevButton.build('Settimana precedente');
-    nextButton.build('Settimana\nsuccessiva');
+    nextButton.build('Settimana successiva');
 
     prevButton.render();
     prevButton.onsubmit(() => {

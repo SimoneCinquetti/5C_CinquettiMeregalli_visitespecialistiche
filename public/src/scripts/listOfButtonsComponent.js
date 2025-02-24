@@ -10,7 +10,7 @@ export const generateButtonComponent = (parentElement) => {
             callback = inputCallback ;
         },
         render : function() {
-            let html = '<button type="button" id="' + nome + '" class="btn btn-info text-white actionButton ' + nome + '">' + nome + '</button>' ;
+            let html = '<button type="button" id="' + nome + '" class="btn btn-info text-black actionButton ' + nome + '">' + nome + '</button>' ;
 
             parentElement.innerHTML = html ;
 
